@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kod</title>
+<style>
+body { font-family: Arial; text-align:center; background:#f5f5f5; }
+.code { font-size:60px; font-weight:bold; margin-top:40px; }
+</style>
+</head>
+<body>
+
+<h2>📱 Kod</h2>
+<p>Bu kodu tahtaya gir</p>
+<div id="out" class="code">------</div>
+
+<script>
+const SECRET = "OKUL-2026-XYZ"; // INDEX İLE AYNI OLMALI
+
+function getParam(name){
+  const url = new URL(window.location.href);
+  return url.searchParams.get(name);
+}
+
+async function sha256(str){
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,"0")).join("");
+}
+
+async function generate(){
+  const challenge = getParam("c");
+  if(!challenge){ document.getElementById("out").innerText="HATA"; return; }
+  const hash = await sha256(SECRET + challenge);
+  const code = (parseInt(hash.substring(0,8),16) % 1000000).toString().padStart(6,"0");
+  document.getElementById("out").innerText = code;
+}
+
+generate();
+</script>
+
+</body>
+</html>
