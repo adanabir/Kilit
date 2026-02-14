@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Kod</title>
+  <style>
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial; margin:0; padding:24px;}
+    .card{max-width:720px; margin:0 auto; border:1px solid #ddd; border-radius:16px; padding:20px;}
+    .big{font-size:36px; font-weight:900;}
+    .muted{color:#666; margin-top:10px;}
+    .code{font-size:64px; font-weight:900; letter-spacing:6px; margin-top:18px;}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="big">📱 Kod</div>
+    <div class="muted">Bu kodu tahtaya gir.</div>
+    <div id="out" class="code">------</div>
+    <div class="muted" id="info"></div>
+  </div>
+
+<script>
+  // ✅ index.html ile AYNI olmalı
+  const SECRET = "OKUL-SECRET-2026-DEGISTIR";
+
+  function getParam(name){
+    const u = new URL(location.href);
+    return u.searchParams.get(name) || "";
+  }
+
+  async function sha256Hex(str){
+    const enc = new TextEncoder().encode(str);
+    const buf = await crypto.subtle.digest("SHA-256", enc);
+    return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,"0")).join("");
+  }
+
+  async function expectedCode(challenge){
+    const hex = await sha256Hex(`${SECRET}|${challenge}`);
+    const n = parseInt(hex.slice(0,8), 16) % 1000000;
+    return String(n).padStart(6,"0");
+  }
+
+  (async ()=>{
+    const ch = getParam("c");
+    if(!ch){
+      document.getElementById("out").textContent = "HATA";
+      document.getElementById("info").textContent = "QR hatalı.";
+      return;
+    }
+    const code = await expectedCode(ch);
+    document.getElementById("out").textContent = code;
+    document.getElementById("info").textContent = "Kod ~30 saniyede bir değişir.";
+  })();
+</script>
+</body>
+</html>
